@@ -57,7 +57,7 @@ In function `copy_process`, we need to insert a `printk` line above `return p;`
 ...
     trace_task_newtask(p, clone_flags);
     uprobe_copy_process(p, clone_flags);
-    printk(KERN_ERR "FORK|%d|%s|=>|%d", current->pid, current->comm, p->pid); // Inserted here!
+    printk(KERN_ERR "FORK|%d|%s|=>|%d|%u", current->pid, current->comm, p->pid, p->flags & PF_KTHREAD); // Inserted here!
     return p;
 ...
 ```
@@ -96,31 +96,25 @@ void __noreturn do_exit(long code)
 The modified kernel will produce log like following:
 
 ```
-[    0.067912] FORK|7|kworker/u8:0|=>|43
-[    0.068754] EXIT|43|kworker/u8:0
-[    0.069761] FORK|2|kthreadd|=>|44
-[    0.069763] EXEC|44|kthreadd|=|cryptomgr_test
-[    0.070101] EXIT|44|cryptomgr_test
-[    0.070778] FORK|7|kworker/u8:0|=>|45
-[    0.071254] EXIT|45|kworker/u8:0
-[    0.071784] FORK|2|kthreadd|=>|46
-[    0.071966] EXEC|46|kthreadd|=|cryptomgr_test
-[    0.072784] EXIT|46|cryptomgr_test
-[    0.072798] FORK|7|kworker/u8:0|=>|47
-[    0.073820] EXIT|47|kworker/u8:0
-[    0.074777] FORK|2|kthreadd|=>|48
-[    0.074931] EXEC|48|kthreadd|=|cryptomgr_test
-[    0.075758] EXIT|48|cryptomgr_test
-[    0.075762] FORK|7|kworker/u8:0|=>|49
-[    0.076212] EXIT|49|kworker/u8:0
-[    0.076756] FORK|2|kthreadd|=>|50
-[    0.076922] EXEC|50|kthreadd|=|cryptomgr_test
-[    0.077086] EXIT|50|cryptomgr_test
-[    0.077763] FORK|7|kworker/u8:0|=>|51
-[    0.078747] EXIT|51|kworker/u8:0
+[    4.070211] FORK|170|S05modules|=>|172|0
+[    4.082378] EXEC|172|S05modules|=|egrep
+[    4.092978] EXEC|172|egrep|=|grep
+[    4.098429] EXIT|172|grep
+[    4.099345] EXIT|170|S05modules
+[    4.099777] FORK|130|rc|=>|173|0
+[    4.100872] EXEC|173|rc|=|S08localnet
+[    4.102791] FORK|173|S08localnet|=>|174|0
+[    4.103201] EXEC|174|S08localnet|=|stty
+[    4.104313] EXIT|174|stty
+[    4.108745] FORK|173|S08localnet|=>|175|0
+[    4.123296] EXEC|175|S08localnet|=|cat
+[    4.125846] EXIT|175|cat
+[    4.126549] FORK|173|S08localnet|=>|176|0
 ```
 
-And this tool will produce text output like following:
+## Text tree
+
+The text tree output is like the following:
 
 ```
 [0] idle(living)
@@ -140,3 +134,9 @@ And this tool will produce text output like following:
 `" \_ "` means a `fork` calling.
 
 The is similar with `ps(1)`/`pstree(1)`. But `ps(1)`/`pstree(1)` can only output the living LWP.
+
+## Timeline
+
+This tool can also generate a timeline view:
+
+![Timeline](screenshots/timeline.png)
