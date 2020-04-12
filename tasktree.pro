@@ -21,17 +21,22 @@ SOURCES += \
     mainwindow.cpp \
     task.cpp \
     taskmodel.cpp \
-    textlayouter.cpp
+    textlayouter.cpp \
+    timelineruler.cpp \
+    timelinewidget.cpp
 
 HEADERS += \
     dmesgparser.h \
     mainwindow.h \
     task.h \
     taskmodel.h \
-    textlayouter.h
+    textlayouter.h \
+    timelineruler.h \
+    timelinewidget.h
 
 FORMS += \
-    mainwindow.ui
+    mainwindow.ui \
+    timelinewidget.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

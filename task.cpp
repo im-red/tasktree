@@ -24,7 +24,7 @@
 
 #include "task.h"
 
-Task::Task(Type t, int id, int pid, const QString &comm, int64_t startTime)
+Task::Task(Type t, int id, int pid, const QString &comm, int64_t startTime, bool kthread)
     : m_type(t)
     , m_id(id)
     , m_pid(pid)
@@ -34,6 +34,7 @@ Task::Task(Type t, int id, int pid, const QString &comm, int64_t startTime)
     , m_parentId(-1)
     , m_preExecId(-1)
     , m_postExecId(-1)
+    , m_kthread(kthread)
 {
 
 }
@@ -108,6 +109,16 @@ int64_t Task::duration() const
     return result;
 }
 
+QString Task::description() const
+{
+    QString result = QString("[%1] %2").arg(pid()).arg(comm());
+    if (duration() == -1)
+    {
+        result += "(living)";
+    }
+    return result;
+}
+
 QString Task::dump() const
 {
     QString children = "(";
@@ -130,6 +141,11 @@ QString Task::dump() const
             .arg(m_startTime).arg(m_stopTime)
             .arg(m_parentId).arg(m_preExecId).arg(m_postExecId)
             .arg(children);
+}
+
+bool Task::kthread() const
+{
+    return m_kthread;
 }
 
 int Task::preExecId() const

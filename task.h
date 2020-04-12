@@ -40,7 +40,7 @@ public:
     };
 
 public:
-    Task(Type t, int id, int pid, const QString &comm, int64_t startTime);
+    Task(Type t, int id, int pid, const QString &comm, int64_t startTime, bool kthread);
 
     int id() const;
     int pid() const;
@@ -51,6 +51,8 @@ public:
     int preExecId() const;
     int postExecId() const;
     std::vector<int> childrenId() const;
+    bool kthread() const;
+
     int childrenId(int i) const { assert(i < childrenCount()); return m_childrenId[static_cast<size_t>(i)]; }
     int childrenCount() const { return static_cast<int>(m_childrenId.size()); }
 
@@ -62,6 +64,7 @@ public:
     void addChild(int id);
     int64_t duration() const;
 
+    QString description() const;
     QString dump() const;
 
 private:
@@ -83,5 +86,7 @@ private:
     int m_preExecId;
     int m_postExecId;
     std::vector<int> m_childrenId;
+
+    bool m_kthread;
 };
 

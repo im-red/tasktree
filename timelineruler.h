@@ -22,52 +22,38 @@
  * SOFTWARE.
  ********************************************************************************/
 
-#include "dmesgparser.h"
-#include "mainwindow.h"
-#include "textlayouter.h"
-#include "ui_mainwindow.h"
+#pragma once
 
-#include <QFileDialog>
-#include <QFile>
-#include <QDebug>
+#include <QWidget>
 
-MainWindow::MainWindow(QWidget *parent)
-    : QMainWindow(parent)
-    , ui(new Ui::MainWindow)
+class TimeLineRuler : public QWidget
 {
-    ui->setupUi(this);
-}
+    Q_OBJECT
+public:
+    explicit TimeLineRuler(QWidget *parent = nullptr);
 
-MainWindow::~MainWindow()
-{
-    delete ui;
-}
+    int64_t startTime() const;
+    void setStartTime(const int64_t &startTime);
 
-void MainWindow::on_actionOpen_triggered()
-{
-    QString path = QFileDialog::getOpenFileName();
-    qDebug() << path;
+    int64_t stopTime() const;
+    void setStopTime(const int64_t &stopTime);
 
-    if (path.size() == 0)
-    {
-        return;
-    }
+    int startX() const;
+    void setStartX(int startX);
 
-    QFile file(path);
-    if (!file.open(QIODevice::ReadOnly))
-    {
-        qDebug() << file.errorString();
-        return;
-    }
+    int stopX() const;
+    void setStopX(int stopX);
 
-    QString s = file.readAll();
+protected:
+    void paintEvent(QPaintEvent *event) override;
 
-    DmesgParser dp(m_model);
-    dp.parse(s);
+private:
+    void drawNumber(QPainter &painter);
 
-    TextLayouter tl(m_model);
-
-    ui->textBrowser->setText(tl.layout());
-    ui->widgetTimeline->setModel(m_model);
-}
+private:
+    int64_t m_startTime;
+    int64_t m_stopTime;
+    int m_startX;
+    int m_stopX;
+};
 

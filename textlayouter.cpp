@@ -52,16 +52,6 @@ static void appendSpace(QString &s, int x)
     }
 }
 
-static QString description(const Task &t)
-{
-    QString result = QString("[%1] %2").arg(t.pid()).arg(t.comm());
-    if (t.duration() == -1)
-    {
-        result += "(living)";
-    }
-    return result;
-}
-
 QString TextLayouter::layout()
 {
     vector<TextLayoutData> layouting;
@@ -72,7 +62,7 @@ QString TextLayouter::layout()
 
     {
         TextLayoutData d(0);
-        result += description(m_model.task(d.id)) + "\n";
+        result += m_model.task(d.id).description() + "\n";
         if (m_model.task(d.id).childrenId().size() != 0)
         {
             layouting.push_back(d);
@@ -119,7 +109,7 @@ QString TextLayouter::layout()
             {
                 layouting.push_back(d);
             }
-            line += description(t);
+            line += t.description();
 
             curId = t.postExecId();
             if (curId != -1)

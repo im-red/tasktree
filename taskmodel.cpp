@@ -48,7 +48,7 @@ void TaskModel::clear()
     addIdleTask();
 }
 
-void TaskModel::addForkTask(int pid, int ppid, const QString &comm, int64_t startTime)
+void TaskModel::addForkTask(int pid, int ppid, const QString &comm, int64_t startTime, bool kthread)
 {
     // qDebug() << pid << ppid << comm << startTime;
 
@@ -62,7 +62,7 @@ void TaskModel::addForkTask(int pid, int ppid, const QString &comm, int64_t star
     int parentId = m_pid2id[ppid].back();
     int id = static_cast<int>(m_tasks.size());
 
-    m_tasks.emplace_back(Task::Fork, id, pid, comm, startTime);
+    m_tasks.emplace_back(Task::Fork, id, pid, comm, startTime, kthread);
     m_pid2id[pid].push_back(id);
 
     m_tasks[static_cast<size_t>(id)].setParentId(parentId);
@@ -77,8 +77,9 @@ void TaskModel::addExecTask(int pid, const QString &comm, int64_t startTime)
 
     int id = static_cast<int>(m_tasks.size());
     int preExecId = m_pid2id[pid].back();
+    bool kthread = task(preExecId).kthread();
 
-    m_tasks.emplace_back(Task::Exec, id, pid, comm, startTime);
+    m_tasks.emplace_back(Task::Exec, id, pid, comm, startTime, kthread);
     m_pid2id[pid].push_back(id);
 
     m_tasks[static_cast<size_t>(id)].setPreExecId(preExecId);
@@ -128,6 +129,6 @@ void TaskModel::addIdleTask()
 {
     int id = static_cast<int>(m_tasks.size());
 
-    m_tasks.emplace_back(Task::Idle, id, 0, "idle", 0);
+    m_tasks.emplace_back(Task::Idle, id, 0, "idle", 0, true);
     m_pid2id[id].push_back(id);
 }

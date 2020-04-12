@@ -88,21 +88,22 @@ void DmesgParser::parseOneLine(const QString &s)
 
 void DmesgParser::parseForkLine(int64_t time, const QString &s)
 {
-    // FORK|570|VBoxService|=>|571
+    // FORK|570|VBoxService|=>|571|0
     QStringList list = s.split('|');
-    assert(list.size() == 5);
+    assert(list.size() >= 6);
 
     int ppid = list[1].toInt();
     int pid = list[4].toInt();
+    bool kthread = (list[5].toInt() != 0);
 
-    m_model.addForkTask(pid, ppid, list[2], time);
+    m_model.addForkTask(pid, ppid, list[2], time, kthread);
 }
 
 void DmesgParser::parseExecLine(int64_t time, const QString &s)
 {
     // EXEC|569|S35vboxadd-serv|=|grep
     QStringList list = s.split('|');
-    assert(list.size() == 5);
+    assert(list.size() >= 5);
 
     int pid = list[1].toInt();
 
@@ -113,7 +114,7 @@ void DmesgParser::parseExitLine(int64_t time, const QString &s)
 {
     // EXIT|568|lsmod
     QStringList list = s.split('|');
-    assert(list.size() == 3);
+    assert(list.size() >= 3);
 
     int pid = list[1].toInt();
 

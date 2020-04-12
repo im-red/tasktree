@@ -37,7 +37,7 @@ public:
 
     void clear();
 
-    void addForkTask(int pid, int ppid, const QString &comm, int64_t startTime);
+    void addForkTask(int pid, int ppid, const QString &comm, int64_t startTime, bool kthread);
     void addExecTask(int pid, const QString &comm, int64_t startTime);
     void taskExit(int pid, int64_t stopTime);
 

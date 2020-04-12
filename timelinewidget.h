@@ -22,52 +22,67 @@
  * SOFTWARE.
  ********************************************************************************/
 
-#include "dmesgparser.h"
-#include "mainwindow.h"
-#include "textlayouter.h"
-#include "ui_mainwindow.h"
+#pragma once
 
-#include <QFileDialog>
-#include <QFile>
-#include <QDebug>
+#include "taskmodel.h"
 
-MainWindow::MainWindow(QWidget *parent)
-    : QMainWindow(parent)
-    , ui(new Ui::MainWindow)
-{
-    ui->setupUi(this);
+#include <QWidget>
+#include <QGraphicsScene>
+#include <QGraphicsItem>
+
+#include <vector>
+
+namespace Ui {
+class TimeLineWidget;
 }
 
-MainWindow::~MainWindow()
+class TimeLineWidget : public QWidget
 {
-    delete ui;
-}
+    Q_OBJECT
 
-void MainWindow::on_actionOpen_triggered()
-{
-    QString path = QFileDialog::getOpenFileName();
-    qDebug() << path;
+public:
+    explicit TimeLineWidget(QWidget *parent = nullptr);
+    ~TimeLineWidget() override;
 
-    if (path.size() == 0)
-    {
-        return;
-    }
+    void setModel(const TaskModel &model);
 
-    QFile file(path);
-    if (!file.open(QIODevice::ReadOnly))
-    {
-        qDebug() << file.errorString();
-        return;
-    }
+protected:
+    void resizeEvent(QResizeEvent *event) override;
+    void showEvent(QShowEvent *event) override;
 
-    QString s = file.readAll();
+private slots:
+    void on_buttonDebug_clicked();
 
-    DmesgParser dp(m_model);
-    dp.parse(s);
+private:
+    void initConnection();
 
-    TextLayouter tl(m_model);
+    // generate bright color according to the description of a task
+    static QColor generateBrightColor(const QByteArray &ba);
+    static QColor itemColor(const Task &t);
 
-    ui->textBrowser->setText(tl.layout());
-    ui->widgetTimeline->setModel(m_model);
-}
+    QPointF scenePointOnViewCenter() const;
+
+    int centerTask() const;
+    void centerOnTask(int i);
+
+    qreal unitWidth() const;
+    qreal unitHeight() const;
+
+    bool taskShouldShow(int i) const;
+    bool textShouldShow() const;
+
+    void clearScene();
+    void initItems();
+    void redrawScene();
+
+    void updateRuler();
+
+private:
+    Ui::TimeLineWidget *ui;
+    QGraphicsScene *m_scene;
+    TaskModel m_model;
+    int64_t m_maxStopTime;
+    std::vector<QGraphicsRectItem *> m_rects;
+    std::vector<QGraphicsTextItem *> m_texts;
+};
 
